@@ -1,0 +1,17 @@
+{
+  "resourceName": "s3d39983f5",
+  "policyUUID": "d39983f5",
+  "bucketName": "turtlemessenger65e8097175c84c8a9e575c2c66ab92ad",
+  "storageAccess": "authAndGuest",
+  "guestAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "groupAccess": {}
+}

@@ -1,0 +1,21 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-turtlemessenger-dev-213114-authRole",
+      "UnauthRoleArn": "arn:aws:iam::616385062016:role/amplify-turtlemessenger-dev-213114-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::616385062016:role/amplify-turtlemessenger-dev-213114-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-turtlemessenger-dev-213114-deployment",
+      "UnauthRoleName": "amplify-turtlemessenger-dev-213114-unauthRole",
+      "StackName": "amplify-turtlemessenger-dev-213114",
+      "StackId": "arn:aws:cloudformation:us-east-1:616385062016:stack/amplify-turtlemessenger-dev-213114/1a4cd9e0-cd73-11ec-959c-0a7829d37e6d",
+      "AmplifyAppId": "d2h94dv9hwztqq"
+    },
+    "categories": {
+      "auth": {
+        "turtlemessenger46df8cc6": {},
+        "true": {}
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+type Chatdata @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  message: String
+  media: [String]
+  createdAt: AWSTimestamp
+  updatedAt: AWSTimestamp
+  chatId: String
+  senderId: String
+}
+enum ChatType {
+  PRIVATE
+  GROUP
+}
+type Users @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  username: String
+  bio: String
+  createdAt: AWSTimestamp
+  chats: [Chat] @manyToMany(relationName: "UserChat")
+}
+
+type Chat @model @auth(rules: [{ allow: public }]) {
+  id: ID!
+  name: String
+  adminId: String
+  type: ChatType
+  members: [Users] @manyToMany(relationName: "UserChat")
+}
