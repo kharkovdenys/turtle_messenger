@@ -1,37 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:turtle_messenger/views/widgets/login_text_field.dart';
-import 'package:turtle_messenger/views/widgets/primary_button.dart';
 import 'package:turtle_messenger/routes/routes_path.dart';
 import 'package:turtle_messenger/services/get_it_service.dart';
 import 'package:turtle_messenger/services/navigation_service.dart';
+import 'package:turtle_messenger/services/size_config.dart';
 import 'package:turtle_messenger/services/validations.dart';
 import 'package:turtle_messenger/stores/auth.dart';
 import 'package:turtle_messenger/theme/colors.dart';
-import 'package:turtle_messenger/services/size_config.dart';
+import 'package:turtle_messenger/views/widgets/login_text_field.dart';
+import 'package:turtle_messenger/views/widgets/primary_button.dart';
 import 'package:turtle_messenger/views/widgets/snackbars.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late AuthStore _authStore;
   final NavigationService _navigationService =
-      get_it_instance_const<NavigationService>();
+      getItInstanceConst<NavigationService>();
 
   TextEditingController usernameCtrl = TextEditingController();
   TextEditingController passwordCtrl = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _authStore = context.read<AuthStore>();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +82,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           isSignedIn
                               ? _navigationService
                                   .popAllAndReplace(RoutePath.home)
-                              :  showErrorSnackBar(context, "Error login");
+                              : WidgetsBinding.instance.addPostFrameCallback(
+                                  (_) => showErrorSnackBar(
+                                      context, "Error login"));
                         } else {
                           AuthStore().resend(username: usernameCtrl.text);
                           _navigationService.navigateTo(
@@ -139,5 +135,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _authStore = context.read<AuthStore>();
   }
 }

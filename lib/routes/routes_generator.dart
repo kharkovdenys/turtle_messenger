@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:turtle_messenger/routes/routes_path.dart';
-import 'package:turtle_messenger/views/screens/authentication/login_screen.dart';
 import 'package:turtle_messenger/views/screens/authentication/confirm_screen.dart';
+import 'package:turtle_messenger/views/screens/authentication/login_screen.dart';
 import 'package:turtle_messenger/views/screens/authentication/register_screen.dart';
 import 'package:turtle_messenger/views/screens/home.dart';
 import 'package:turtle_messenger/wrapper.dart';

@@ -142,7 +142,7 @@ class Chatdata extends Model {
     'id': id, 'message': _message, 'media': _media, 'createdAt': _createdAt?.toSeconds(), 'updatedAt': _updatedAt?.toSeconds(), 'chatId': _chatId, 'senderId': _senderId
   };
 
-  static final QueryField ID = QueryField(fieldName: "chatdata.id");
+  static final QueryField ID = QueryField(fieldName: "id");
   static final QueryField MESSAGE = QueryField(fieldName: "message");
   static final QueryField MEDIA = QueryField(fieldName: "media");
   static final QueryField CREATEDAT = QueryField(fieldName: "createdAt");

@@ -1,26 +1,46 @@
-import 'package:amplify_datastore/amplify_datastore.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:turtle_messenger/stores/chat.dart';
-import 'package:turtle_messenger/views/screens/chat/chat_detail_page.dart';
-import 'package:turtle_messenger/theme/colors.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
-import '../../../stores/user.dart';
-import 'chatdetails/add_chat.dart';
-import 'package:turtle_messenger/models/ModelProvider.dart';
-
 import 'package:http/http.dart' as http;
-
-import 'group_detail_page.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:turtle_messenger/models/ModelProvider.dart';
+import 'package:turtle_messenger/stores/chat.dart';
+import 'package:turtle_messenger/stores/user.dart';
+import 'package:turtle_messenger/theme/colors.dart';
+import 'package:turtle_messenger/views/screens/chat/chat_detail_page.dart';
+import 'package:turtle_messenger/views/screens/chat/chatdetails/add_chat.dart';
+import 'package:turtle_messenger/views/screens/chat/group_detail_page.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({Key? key}) : super(key: key);
 
   @override
-  _ChatPageState createState() => _ChatPageState();
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class UserChatCard extends StatefulWidget {
+  final BuildContext context;
+  final ChatType type;
+  final Size size;
+  final String? name;
+  final String? adminId;
+  final String chatId;
+  final String currentId;
+
+  const UserChatCard({
+    Key? key,
+    required this.context,
+    required this.size,
+    required this.name,
+    required this.chatId,
+    required this.type,
+    required this.currentId,
+    this.adminId,
+  }) : super(key: key);
+
+  @override
+  State<UserChatCard> createState() => _UserChatCardState();
 }
 
 class _ChatPageState extends State<ChatPage> {
@@ -28,32 +48,16 @@ class _ChatPageState extends State<ChatPage> {
   late Stream<SubscriptionEvent<UserChat>> stream;
 
   @override
-  void initState() {
-    chatStore = Provider.of<ChatStore>(context, listen: false);
-    fetchUserChats();
-    stream = Amplify.DataStore.observe(UserChat.classType)
-      ..listen(handleSubscription);
-    super.initState();
-  }
-
-  handleSubscription(SubscriptionEvent<UserChat> event) async {
-    if (event.item.users.id == UserStore().currUser!.id) {
-      await chatStore.fetchUserChats();
-      if (mounted) setState(() {});
-    }
-  }
-
-  fetchUserChats() async {
-    await chatStore.fetchUserChats();
-    if (mounted) setState(() {});
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
       body: getBody(),
     );
+  }
+
+  fetchUserChats() async {
+    await chatStore.fetchUserChats();
+    if (mounted) setState(() {});
   }
 
   Widget getBody() {
@@ -118,30 +122,22 @@ class _ChatPageState extends State<ChatPage> {
       ],
     );
   }
-}
 
-class UserChatCard extends StatefulWidget {
-  final BuildContext context;
-  final ChatType type;
-  final Size size;
-  final String? name;
-  final String? adminId;
-  final String chatId;
-  final String currentId;
-
-  const UserChatCard({
-    Key? key,
-    required this.context,
-    required this.size,
-    required this.name,
-    required this.chatId,
-    required this.type,
-    required this.currentId,
-    this.adminId,
-  }) : super(key: key);
+  handleSubscription(SubscriptionEvent<UserChat> event) async {
+    if (event.item.users.id == UserStore().currUser!.id) {
+      await chatStore.fetchUserChats();
+      if (mounted) setState(() {});
+    }
+  }
 
   @override
-  _UserChatCardState createState() => _UserChatCardState();
+  void initState() {
+    chatStore = Provider.of<ChatStore>(context, listen: false);
+    fetchUserChats();
+    stream = Amplify.DataStore.observe(UserChat.classType)
+      ..listen(handleSubscription);
+    super.initState();
+  }
 }
 
 class _UserChatCardState extends State<UserChatCard> {
@@ -150,50 +146,6 @@ class _UserChatCardState extends State<UserChatCard> {
       "https://www.arrowbenefitsgroup.com/wp-content/uploads/2018/04/unisex-avatar.png";
   String nameChat = "";
   List<Users> users = [];
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.type == ChatType.PRIVATE) {
-      getUsers();
-    } else {
-      setState(() {
-        nameChat = widget.name!;
-      });
-      getUsers();
-    }
-    ChatStore().lastMessage(widget.chatId).then((result) {
-      setState(() {
-        lastMessage = result;
-      });
-    });
-  }
-
-  getUsers() async {
-    List<UserChat> id = await Amplify.DataStore.query(UserChat.classType,
-        where: UserChat.CHAT.eq(widget.chatId));
-    for (int i = 0; i < id.length; i++) {
-      if (id[i].users.id != widget.currentId) {
-        Users temp = (await Amplify.DataStore.query(Users.classType,
-            where: Users.ID.eq(id[i].users.id)))[0];
-        users.add(temp);
-      }
-    }
-    if (widget.type == ChatType.PRIVATE) {
-      setState(() {
-        nameChat = users[0].username!;
-      });
-      GetUrlResult value =
-          await (Amplify.Storage.getUrl(key: users[0].username!));
-      http.get(Uri.parse(value.url)).then((url) => setState(() {
-            if (url.statusCode != 404) {
-              setState(() {
-                profileImage = value.url;
-              });
-            }
-          }));
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -299,5 +251,49 @@ class _UserChatCardState extends State<UserChatCard> {
         ),
       ),
     );
+  }
+
+  getUsers() async {
+    List<UserChat> id = await Amplify.DataStore.query(UserChat.classType,
+        where: UserChat.CHAT.eq(widget.chatId));
+    for (int i = 0; i < id.length; i++) {
+      if (id[i].users.id != widget.currentId) {
+        Users temp = (await Amplify.DataStore.query(Users.classType,
+            where: Users.ID.eq(id[i].users.id)))[0];
+        users.add(temp);
+      }
+    }
+    if (widget.type == ChatType.PRIVATE) {
+      setState(() {
+        nameChat = users[0].username!;
+      });
+      GetUrlResult value =
+          await (Amplify.Storage.getUrl(key: users[0].username!));
+      http.get(Uri.parse(value.url)).then((url) => setState(() {
+            if (url.statusCode != 404) {
+              setState(() {
+                profileImage = value.url;
+              });
+            }
+          }));
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.type == ChatType.PRIVATE) {
+      getUsers();
+    } else {
+      setState(() {
+        nameChat = widget.name!;
+      });
+      getUsers();
+    }
+    ChatStore().lastMessage(widget.chatId).then((result) {
+      setState(() {
+        lastMessage = result;
+      });
+    });
   }
 }

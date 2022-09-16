@@ -46,19 +46,6 @@ class SizeConfig {
     }
   }
 
-  static double getWidthRatio(double val) {
-    double res = (val / refWidth!) * 100;
-    double temp = res * blockSizeHorizontal!;
-
-    return temp;
-  }
-
-  static double getHeightRatio(double val) {
-    double res = (val / refHeight!) * 100;
-    double temp = res * blockSizeVertical!;
-    return temp;
-  }
-
   static double getFontRatio(double val) {
     double res = (val / refWidth!) * 100;
     double temp = 0.0;
@@ -70,12 +57,25 @@ class SizeConfig {
 
     return temp;
   }
+
+  static double getHeightRatio(double val) {
+    double res = (val / refHeight!) * 100;
+    double temp = res * blockSizeVertical!;
+    return temp;
+  }
+
+  static double getWidthRatio(double val) {
+    double res = (val / refWidth!) * 100;
+    double temp = res * blockSizeHorizontal!;
+
+    return temp;
+  }
 }
 
 extension SizeUtils on num {
-  double get toWidth => SizeConfig.getWidthRatio(toDouble());
+  double get toFont => SizeConfig.getFontRatio(toDouble());
 
   double get toHeight => SizeConfig.getHeightRatio(toDouble());
 
-  double get toFont => SizeConfig.getFontRatio(toDouble());
+  double get toWidth => SizeConfig.getWidthRatio(toDouble());
 }

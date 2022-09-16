@@ -3,7 +3,7 @@ import 'package:turtle_messenger/services/size_config.dart';
 
 class PrimaryButton extends StatefulWidget {
   final String text;
-  final void Function() onPress;
+  final Function() onPress;
 
   const PrimaryButton({
     Key? key,
@@ -12,7 +12,7 @@ class PrimaryButton extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _PrimaryButtonState createState() => _PrimaryButtonState();
+  State<PrimaryButton> createState() => _PrimaryButtonState();
 }
 
 class _PrimaryButtonState extends State<PrimaryButton> {

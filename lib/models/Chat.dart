@@ -141,7 +141,7 @@ class Chat extends Model {
     'id': id, 'name': _name, 'adminId': _adminId, 'type': enumToString(_type), 'members': _members?.map((UserChat? e) => e?.toJson()).toList(), 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
 
-  static final QueryField ID = QueryField(fieldName: "chat.id");
+  static final QueryField ID = QueryField(fieldName: "id");
   static final QueryField NAME = QueryField(fieldName: "name");
   static final QueryField ADMINID = QueryField(fieldName: "adminId");
   static final QueryField TYPE = QueryField(fieldName: "type");

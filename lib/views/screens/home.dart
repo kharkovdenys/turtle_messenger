@@ -1,27 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:turtle_messenger/views/screens/settings/settings_page.dart';
-import 'package:turtle_messenger/stores/user.dart';
-import 'package:turtle_messenger/views/screens/chat/chat_page.dart';
-import 'package:turtle_messenger/theme/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:turtle_messenger/stores/user.dart';
+import 'package:turtle_messenger/theme/colors.dart';
+import 'package:turtle_messenger/views/screens/chat/chat_page.dart';
+import 'package:turtle_messenger/views/screens/settings/settings_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   int pageIndex = 0;
 
   late UserStore userStore;
-
-  @override
-  void initState() {
-    userStore = context.read<UserStore>();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(
             textItems.length,
-                (index) {
+            (index) {
               return GestureDetector(
                 onTap: () {
                   setState(() {
@@ -66,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icon(
                       iconItems[index],
                       color:
-                      pageIndex == index ? primary : white.withOpacity(0.5),
+                          pageIndex == index ? primary : white.withOpacity(0.5),
                       size: 29,
                     ),
                     const SizedBox(
@@ -89,5 +83,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    userStore = context.read<UserStore>();
+    super.initState();
   }
 }

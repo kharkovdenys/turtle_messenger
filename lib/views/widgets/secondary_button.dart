@@ -3,15 +3,15 @@ import 'package:turtle_messenger/services/size_config.dart';
 
 class SecondaryButton extends StatefulWidget {
   final String text;
-  final void Function() onPress;
+  final Function() onPress;
   const SecondaryButton({
-  Key? key,
+    Key? key,
     required this.text,
     required this.onPress,
   }) : super(key: key);
 
   @override
-  _SecondaryButtonState createState() => _SecondaryButtonState();
+  State<SecondaryButton> createState() => _SecondaryButtonState();
 }
 
 class _SecondaryButtonState extends State<SecondaryButton> {

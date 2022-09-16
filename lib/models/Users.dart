@@ -134,7 +134,7 @@ class Users extends Model {
     'id': id, 'username': _username, 'bio': _bio, 'createdAt': _createdAt?.toSeconds(), 'chats': _chats?.map((UserChat? e) => e?.toJson()).toList(), 'updatedAt': _updatedAt?.format()
   };
 
-  static final QueryField ID = QueryField(fieldName: "users.id");
+  static final QueryField ID = QueryField(fieldName: "id");
   static final QueryField USERNAME = QueryField(fieldName: "username");
   static final QueryField BIO = QueryField(fieldName: "bio");
   static final QueryField CREATEDAT = QueryField(fieldName: "createdAt");

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:turtle_messenger/theme/colors.dart';
 import 'package:turtle_messenger/services/size_config.dart';
+import 'package:turtle_messenger/theme/colors.dart';
 
 class CustomLoginTextField extends StatelessWidget {
   final String hintTextL;
@@ -11,16 +11,16 @@ class CustomLoginTextField extends StatelessWidget {
   final TextInputType type;
   final String? autofill;
   final int? maxLength;
-  const CustomLoginTextField({
-  Key? key,
-    required this.hintTextL,
-    required this.ctrl,
-    required this.validation,
-    this.autofill,
-    this.obscureText = false,
-    required this.type,
-    this.maxLength
-  }) : super(key: key);
+  const CustomLoginTextField(
+      {Key? key,
+      required this.hintTextL,
+      required this.ctrl,
+      required this.validation,
+      this.autofill,
+      this.obscureText = false,
+      required this.type,
+      this.maxLength})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class CustomLoginTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: type,
       maxLength: maxLength,
-      autofillHints: autofill!=null?[autofill!]:null,
+      autofillHints: autofill != null ? [autofill!] : null,
       inputFormatters: [FilteringTextInputFormatter.deny(RegExp('[ ]'))],
       autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: InputDecoration(

@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:turtle_messenger/theme/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:turtle_messenger/stores/auth.dart';
+import 'package:turtle_messenger/stores/user.dart';
+import 'package:turtle_messenger/theme/colors.dart';
 import 'package:turtle_messenger/views/widgets/add_group.dart';
-import '../../../../stores/auth.dart';
-import '../../../../stores/user.dart';
-import '../../../widgets/primary_button.dart';
+import 'package:turtle_messenger/views/widgets/primary_button.dart';
+
 import 'users_list.dart';
 
 class CreateChat extends StatefulWidget {
   const CreateChat({Key? key}) : super(key: key);
 
   @override
-  _CreateChatState createState() => _CreateChatState();
+  State<CreateChat> createState() => _CreateChatState();
 }
 
 class _CreateChatState extends State<CreateChat> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,11 +48,20 @@ class _CreateChatState extends State<CreateChat> {
               );
             }
           }),
-          const SizedBox(height: 30,),
+          const SizedBox(
+            height: 30,
+          ),
           PrimaryButton(
-            onPress: (){addGroup(context);},
+            onPress: () {
+              addGroup(context);
+            },
             text: 'Add group',
           )
         ]));
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 }

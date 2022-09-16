@@ -13,20 +13,22 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.4
-  amplify_auth_cognito: ^0.5.1
-  amplify_api: ^0.5.1
-  amplify_datastore: ^0.5.1
-  amplify_flutter: ^0.5.1
+  amplify_auth_cognito: ^0.6.7
+  amplify_api: ^0.6.7
+  amplify_datastore: ^0.6.7
+  amplify_flutter: ^0.6.7
   provider: ^6.0.3
   get_it: ^7.2.0
-  flutter_native_splash: ^2.2.1
-  cached_network_image: ^3.2.1
+  flutter_native_splash: ^2.2.9
+  cached_network_image: ^3.2.2
   pull_to_refresh: ^2.0.0
   image_picker: ^0.8.5+3
-  dash_chat_2: ^0.0.6
-  amplify_storage_s3: ^0.5.1
+  dash_chat_2: ^0.0.14
+  amplify_storage_s3: ^0.6.7
   photo_view: ^0.14.0
-  http: ^0.13.4
+  http: ^0.13.5
+  uuid: ^3.0.6
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:

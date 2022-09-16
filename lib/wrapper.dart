@@ -4,7 +4,7 @@ import 'package:turtle_messenger/services/size_config.dart';
 class Wrapper extends StatefulWidget {
   const Wrapper({Key? key}) : super(key: key);
   @override
-  _WrapperState createState() => _WrapperState();
+  State<Wrapper> createState() => _WrapperState();
 }
 
 class _WrapperState extends State<Wrapper> {

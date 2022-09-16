@@ -1,33 +1,41 @@
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:turtle_messenger/theme/colors.dart';
-import 'package:provider/provider.dart';
-import '../../../../models/Chat.dart';
-import '../../../../models/UserChat.dart';
-import '../../../../models/Users.dart';
-import '../../../../stores/auth.dart';
-import '../../../../stores/chat.dart';
-import '../../../../stores/user.dart';
 import 'package:http/http.dart' as http;
-
-import '../../../widgets/snackbars.dart';
+import 'package:provider/provider.dart';
+import 'package:turtle_messenger/models/Chat.dart';
+import 'package:turtle_messenger/models/UserChat.dart';
+import 'package:turtle_messenger/models/Users.dart';
+import 'package:turtle_messenger/stores/auth.dart';
+import 'package:turtle_messenger/stores/chat.dart';
+import 'package:turtle_messenger/stores/user.dart';
+import 'package:turtle_messenger/theme/colors.dart';
+import 'package:turtle_messenger/views/widgets/snackbars.dart';
 
 class AddUser extends StatefulWidget {
   final List<Users> users;
   final String chatId;
-  const AddUser({Key? key, required this.users, required this.chatId}) : super(key: key);
+  const AddUser({Key? key, required this.users, required this.chatId})
+      : super(key: key);
 
   @override
-  _AddUserState createState() => _AddUserState();
+  State<AddUser> createState() => _AddUserState();
+}
+
+class UsersList extends StatefulWidget {
+  final Users user;
+  final List<Users> users;
+  final String chatId;
+
+  const UsersList(
+      {Key? key, required this.user, required this.users, required this.chatId})
+      : super(key: key);
+
+  @override
+  State<UsersList> createState() => _UsersListState();
 }
 
 class _AddUserState extends State<AddUser> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,56 +54,37 @@ class _AddUserState extends State<AddUser> {
           ),
           Consumer2<UserStore, AuthStore>(
               builder: (_, userStore, authStore, __) {
-                if (userStore.allOtherUsers == null) {
-                  return Container();
-                } else if (userStore.allOtherUsers!.isEmpty) {
-                  return const Text("Sorry there is no other user.");
-                } else {
-                  return Column(
-                    children: [
-                      ...userStore.allOtherUsers!.map((user) {
-                        return UsersList(user: user,users:widget.users,chatId: widget.chatId,);
-                      }).toList()
-                    ],
-                  );
-                }
-              }),
+            if (userStore.allOtherUsers == null) {
+              return Container();
+            } else if (userStore.allOtherUsers!.isEmpty) {
+              return const Text("Sorry there is no other user.");
+            } else {
+              return Column(
+                children: [
+                  ...userStore.allOtherUsers!.map((user) {
+                    return UsersList(
+                      user: user,
+                      users: widget.users,
+                      chatId: widget.chatId,
+                    );
+                  }).toList()
+                ],
+              );
+            }
+          }),
         ]));
   }
-}
-class UsersList extends StatefulWidget {
-  final Users user;
-  final List<Users> users;
-  final String chatId;
-
-  const UsersList({Key? key, required this.user, required this.users, required this.chatId})
-      : super(key: key);
 
   @override
-  _UsersListState createState() => _UsersListState();
+  void initState() {
+    super.initState();
+  }
 }
 
 class _UsersListState extends State<UsersList> {
   bool addButtonLoading = false;
   String profileImage =
       "https://www.arrowbenefitsgroup.com/wp-content/uploads/2018/04/unisex-avatar.png";
-
-  @override
-  void initState() {
-    super.initState();
-    setStateProfileImage();
-  }
-
-  void setStateProfileImage() {
-    (Amplify.Storage.getUrl(key: widget.user.username!).then((value) =>
-        http.get(Uri.parse(value.url)).then((url) => setState(() {
-          if (url.statusCode != 404) {
-            setState(() {
-              profileImage = value.url;
-            });
-          }
-        }))));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,30 +129,32 @@ class _UsersListState extends State<UsersList> {
                     child: addButtonLoading
                         ? const CircularProgressIndicator()
                         : IconButton(
-                      icon: const Icon(
-                        Icons.add,
-                        size: 20,
-                      ),
-                      color: primary,
-                      onPressed: () async {
-                        if (!widget.users.contains(widget.user)) {
-                          setState(() {
-                            addButtonLoading = true;
-                          });
-                          Chat chat = (await Amplify.DataStore.query(Chat.classType,
-                              where: Chat.ID.eq(widget.chatId)))[0];
-                          await Amplify.DataStore.save(UserChat(users: widget.user,chat: chat));
-                          await UserStore().fetchCurrentUser();
-                          await ChatStore().fetchUserChats();
-                          setState(() {
-                            addButtonLoading = false;
-                          });
-                        }
-                        else{
-                          showErrorSnackBar(context,"This user has already been added");
-                        }
-                      },
-                    ),
+                            icon: const Icon(
+                              Icons.add,
+                              size: 20,
+                            ),
+                            color: primary,
+                            onPressed: () async {
+                              if (!widget.users.contains(widget.user)) {
+                                setState(() {
+                                  addButtonLoading = true;
+                                });
+                                Chat chat = (await Amplify.DataStore.query(
+                                    Chat.classType,
+                                    where: Chat.ID.eq(widget.chatId)))[0];
+                                await Amplify.DataStore.save(
+                                    UserChat(users: widget.user, chat: chat));
+                                await UserStore().fetchCurrentUser();
+                                await ChatStore().fetchUserChats();
+                                setState(() {
+                                  addButtonLoading = false;
+                                });
+                              } else {
+                                showErrorSnackBar(context,
+                                    "This user has already been added");
+                              }
+                            },
+                          ),
                   ),
                 )
               ],
@@ -172,5 +163,22 @@ class _UsersListState extends State<UsersList> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setStateProfileImage();
+  }
+
+  void setStateProfileImage() {
+    (Amplify.Storage.getUrl(key: widget.user.username!).then(
+        (value) => http.get(Uri.parse(value.url)).then((url) => setState(() {
+              if (url.statusCode != 404) {
+                setState(() {
+                  profileImage = value.url;
+                });
+              }
+            }))));
   }
 }

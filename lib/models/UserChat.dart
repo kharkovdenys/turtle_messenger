@@ -138,7 +138,7 @@ class UserChat extends Model {
     'id': id, 'users': _users?.toJson(), 'chat': _chat?.toJson(), 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
   };
 
-  static final QueryField ID = QueryField(fieldName: "userChat.id");
+  static final QueryField ID = QueryField(fieldName: "id");
   static final QueryField USERS = QueryField(
     fieldName: "users",
     fieldType: ModelFieldType(ModelFieldTypeEnum.model, ofModelName: (Users).toString()));
@@ -148,6 +148,11 @@ class UserChat extends Model {
   static var schema = Model.defineSchema(define: (ModelSchemaDefinition modelSchemaDefinition) {
     modelSchemaDefinition.name = "UserChat";
     modelSchemaDefinition.pluralName = "UserChats";
+    
+    modelSchemaDefinition.indexes = [
+      ModelIndex(fields: const ["usersID"], name: "byUsers"),
+      ModelIndex(fields: const ["chatID"], name: "byChat")
+    ];
     
     modelSchemaDefinition.addField(ModelFieldDefinition.id());
     

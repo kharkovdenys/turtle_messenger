@@ -2,23 +2,21 @@ import 'dart:io';
 
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
-import 'package:amplify_datastore_plugin_interface/amplify_datastore_plugin_interface.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:turtle_messenger/views/widgets/snackbars.dart';
-import 'package:turtle_messenger/views/widgets/update_message_bottom_sheet.dart';
+import 'package:provider/provider.dart';
 import 'package:turtle_messenger/models/ModelProvider.dart';
 import 'package:turtle_messenger/stores/chat.dart';
 import 'package:turtle_messenger/stores/user.dart';
 import 'package:turtle_messenger/theme/colors.dart' as color;
-import 'package:provider/provider.dart';
+import 'package:turtle_messenger/views/screens/chat/chatDetails/appbar.dart';
+import 'package:turtle_messenger/views/screens/chat/chatdetails/appbar_admin.dart';
+import 'package:turtle_messenger/views/screens/chat/chatdetails/users_list_for_group.dart';
+import 'package:turtle_messenger/views/widgets/snackbars.dart';
+import 'package:turtle_messenger/views/widgets/update_message_bottom_sheet.dart';
 import 'package:uuid/uuid.dart';
-import 'package:dash_chat_2/dash_chat_2.dart';
-
-import 'ChatDetails/appbar.dart';
-import 'chatdetails/appbar_admin.dart';
-import 'chatdetails/users_list_for_group.dart';
 
 class GroupDetailPage extends StatefulWidget {
   final String name;
@@ -29,11 +27,43 @@ class GroupDetailPage extends StatefulWidget {
     Key? key,
     required this.name,
     required this.chatId,
-    required this.adminId, required this.users,
+    required this.adminId,
+    required this.users,
   }) : super(key: key);
 
   @override
-  _GroupDetailPageState createState() => _GroupDetailPageState();
+  State<GroupDetailPage> createState() => _GroupDetailPageState();
+}
+
+class HeroPhotoViewRouteWrapper extends StatelessWidget {
+  final ImageProvider imageProvider;
+
+  final BoxDecoration? backgroundDecoration;
+  final dynamic minScale;
+  final dynamic maxScale;
+  const HeroPhotoViewRouteWrapper({
+    Key? key,
+    required this.imageProvider,
+    this.backgroundDecoration,
+    this.minScale,
+    this.maxScale,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints.expand(
+        height: MediaQuery.of(context).size.height,
+      ),
+      child: PhotoView(
+        imageProvider: imageProvider,
+        backgroundDecoration: backgroundDecoration,
+        minScale: minScale,
+        maxScale: maxScale,
+        heroAttributes: const PhotoViewHeroAttributes(tag: "someTag"),
+      ),
+    );
+  }
 }
 
 class _GroupDetailPageState extends State<GroupDetailPage> {
@@ -45,16 +75,6 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
 
   late UserStore userStore;
   late ChatStore chatStore;
-
-  @override
-  void initState() {
-    super.initState();
-    chatStore = Provider.of<ChatStore>(context, listen: false);
-    userStore = Provider.of<UserStore>(context, listen: false);
-    fetchChatData();
-    stream = Amplify.DataStore.observe(Chatdata.classType)
-      ..listen(handleSubscription);
-  }
 
   addToSelectedChats(String messageId) {
     if (selectedChats.contains(messageId)) {
@@ -69,36 +89,6 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     }
   }
 
-  closeSelectionModel() {
-    setState(() {
-      inSelectMode = false;
-      selectedChats = [];
-    });
-  }
-
-  deleteSelectedChats() async {
-    await chatStore.deleteChats(selectedChats);
-    await fetchChatData();
-    setState(() {
-      inSelectMode = false;
-      selectedChats = [];
-    });
-  }
-
-  openUpdateMessageSheet() async {
-    if (selectedChats.length > 1) {
-      showErrorSnackBar(context, "Please select only one message to update.");
-    } else {
-      Chatdata message = await chatStore.getMessage(selectedChats[0]);
-      updateMessageBottomSheet(
-          context, message, chatStore.updateChat, closeSelectionModel);
-    }
-  }
-
-  fetchChatData() async {
-    await chatStore.fetchChatData(widget.chatId);
-    if (mounted) setState(() {});
-  }
   addUsers() async {
     Navigator.push(
       context,
@@ -109,24 +99,6 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         ),
       ),
     );
-  }
-
-  handleSubscription(SubscriptionEvent<Chatdata> event) async {
-    if (event.eventType == EventType.delete) {
-      fetchChatData();
-    } else if (event.eventType == EventType.update) {
-      fetchChatData();
-    } else if (event.eventType == EventType.create) {
-      if (chatStore.chatData.last.id != event.item.id &&
-          event.item.chatId == chatStore.chatData.last.chatId &&
-          event.item.senderId != userStore.currUser?.id) {
-        if (mounted) {
-          setState(() {
-            chatStore.addUpdatedChats(event.item);
-          });
-        }
-      }
-    }
   }
 
   @override
@@ -144,7 +116,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
               closeSelectionModel: closeSelectionModel,
               deleteSelectedChats: deleteSelectedChats,
               openUpdateMessageSheet: openUpdateMessageSheet,
-        addUsers: addUsers,
+              addUsers: addUsers,
             )
           : getChatDetailsAppBar(
               context: context,
@@ -161,63 +133,6 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     );
   }
 
-  Widget getBody() {
-    return Container(
-      child: buildChatList(chatData: chatStore.chatData),
-    );
-  }
-
-  void uploadFile() async {
-    XFile? pickResult = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 100,
-      maxHeight: 400,
-      maxWidth: 400,
-    );
-    if (pickResult == null) return;
-    File? image = File(pickResult.path);
-    List<String> media = [];
-    String uuid = const Uuid().v4();
-    await chatStore.sendPhoto(image, uuid);
-    media.add(uuid);
-    chatStore.addUpdatedChats(
-      Chatdata(
-        chatId: widget.chatId,
-        message: "",
-        media: media,
-        senderId: userStore.currUser?.id,
-        createdAt: TemporalTimestamp.now(),
-        updatedAt: TemporalTimestamp.now(),
-        id: const Uuid().v4(),
-      ),
-    );
-    await chatStore.addChatData(
-        message: "",
-        media: media,
-        chatId: widget.chatId,
-        senderId: userStore.currUser!.id);
-    if (mounted) setState(() {});
-    fetchChatData();
-  }
-
-  urlImage(String value) {
-    if (image[value] == null) {
-      (Amplify.Storage.getUrl(key: value).then((result) => setState(() {
-            image[value] = result.url.replaceFirst('https', 'http');
-          })));
-    }
-    return image[value] ??
-        "https://www.rentaltss.com/images/Videosvet/background_gray.jpg";
-  }
-  String getName(String id){
-    try{
-      String name=(widget.users.firstWhere((element) => element.id==id)).username!;
-      return name;
-    }
-    catch(e) {
-      return "";
-    }
-  }
   Widget buildChatList({required List<Chatdata> chatData}) {
     return DashChat(
         inputOptions: InputOptions(
@@ -239,7 +154,9 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                       url: urlImage(chatData[index].media![number]),
                       fileName: '',
                       type: MediaType.image)),
-              user: ChatUser(id: chatData[index].senderId!,firstName: getName(chatData[index].senderId!)),
+              user: ChatUser(
+                  id: chatData[index].senderId!,
+                  firstName: getName(chatData[index].senderId!)),
               text: chatData[index].message!,
               customProperties: {"id": chatData[index].id},
               createdAt: DateTime.fromMillisecondsSinceEpoch(
@@ -312,34 +229,123 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
           },
         ));
   }
-}
 
-class HeroPhotoViewRouteWrapper extends StatelessWidget {
-  const HeroPhotoViewRouteWrapper({
-    required this.imageProvider,
-    this.backgroundDecoration,
-    this.minScale,
-    this.maxScale,
-  });
+  closeSelectionModel() {
+    setState(() {
+      inSelectMode = false;
+      selectedChats = [];
+    });
+  }
 
-  final ImageProvider imageProvider;
-  final BoxDecoration? backgroundDecoration;
-  final dynamic minScale;
-  final dynamic maxScale;
+  deleteSelectedChats() async {
+    await chatStore.deleteChats(selectedChats);
+    await fetchChatData();
+    setState(() {
+      inSelectMode = false;
+      selectedChats = [];
+    });
+  }
+
+  fetchChatData() async {
+    await chatStore.fetchChatData(widget.chatId);
+    if (mounted) setState(() {});
+  }
+
+  Widget getBody() {
+    return Container(
+      child: buildChatList(chatData: chatStore.chatData),
+    );
+  }
+
+  String getName(String id) {
+    try {
+      String name =
+          (widget.users.firstWhere((element) => element.id == id)).username!;
+      return name;
+    } catch (e) {
+      return "";
+    }
+  }
+
+  handleSubscription(SubscriptionEvent<Chatdata> event) async {
+    if (event.eventType == EventType.delete) {
+      fetchChatData();
+    } else if (event.eventType == EventType.update) {
+      fetchChatData();
+    } else if (event.eventType == EventType.create) {
+      if (chatStore.chatData.last.id != event.item.id &&
+          event.item.chatId == chatStore.chatData.last.chatId &&
+          event.item.senderId != userStore.currUser?.id) {
+        if (mounted) {
+          setState(() {
+            chatStore.addUpdatedChats(event.item);
+          });
+        }
+      }
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints.expand(
-        height: MediaQuery.of(context).size.height,
-      ),
-      child: PhotoView(
-        imageProvider: imageProvider,
-        backgroundDecoration: backgroundDecoration,
-        minScale: minScale,
-        maxScale: maxScale,
-        heroAttributes: const PhotoViewHeroAttributes(tag: "someTag"),
+  void initState() {
+    super.initState();
+    chatStore = Provider.of<ChatStore>(context, listen: false);
+    userStore = Provider.of<UserStore>(context, listen: false);
+    fetchChatData();
+    stream = Amplify.DataStore.observe(Chatdata.classType)
+      ..listen(handleSubscription);
+  }
+
+  openUpdateMessageSheet() async {
+    if (selectedChats.length > 1) {
+      showErrorSnackBar(context, "Please select only one message to update.");
+    } else {
+      Chatdata message = await chatStore.getMessage(selectedChats[0]);
+      WidgetsBinding.instance.addPostFrameCallback((_) =>
+          updateMessageBottomSheet(
+              context, message, chatStore.updateChat, closeSelectionModel));
+    }
+  }
+
+  void uploadFile() async {
+    XFile? pickResult = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 100,
+      maxHeight: 400,
+      maxWidth: 400,
+    );
+    if (pickResult == null) return;
+    File? image = File(pickResult.path);
+    List<String> media = [];
+    String uuid = const Uuid().v4();
+    await chatStore.sendPhoto(image, uuid);
+    media.add(uuid);
+    chatStore.addUpdatedChats(
+      Chatdata(
+        chatId: widget.chatId,
+        message: "",
+        media: media,
+        senderId: userStore.currUser?.id,
+        createdAt: TemporalTimestamp.now(),
+        updatedAt: TemporalTimestamp.now(),
+        id: const Uuid().v4(),
       ),
     );
+    await chatStore.addChatData(
+        message: "",
+        media: media,
+        chatId: widget.chatId,
+        senderId: userStore.currUser!.id);
+    if (mounted) setState(() {});
+    fetchChatData();
+  }
+
+  urlImage(String value) {
+    if (image[value] == null) {
+      (Amplify.Storage.getUrl(key: value).then((result) => setState(() {
+            image[value] = result.url.replaceFirst('https', 'http');
+          })));
+    }
+    return image[value] ??
+        "https://www.rentaltss.com/images/Videosvet/background_gray.jpg";
   }
 }
