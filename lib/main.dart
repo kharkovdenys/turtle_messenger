@@ -7,7 +7,6 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:turtle_messenger/amplifyconfiguration.dart';
 import 'package:turtle_messenger/models/ModelProvider.dart';
@@ -25,8 +24,6 @@ void main() {
     systemNavigationBarColor: Colors.black,
     statusBarColor: Colors.black,
   ));
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(const MyApp());
 }
 
@@ -100,7 +97,6 @@ class _MyAppState extends State<MyApp> {
     } else {
       _navigationService.popAllAndReplace(RoutePath.login);
     }
-    FlutterNativeSplash.remove();
   }
 
   Future<bool> _isSignedIn() async {

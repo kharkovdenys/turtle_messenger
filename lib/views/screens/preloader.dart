@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:turtle_messenger/services/size_config.dart';
 
-class Wrapper extends StatefulWidget {
-  const Wrapper({Key? key}) : super(key: key);
+class Preloader extends StatefulWidget {
+  const Preloader({Key? key}) : super(key: key);
   @override
-  State<Wrapper> createState() => _WrapperState();
+  State<Preloader> createState() => _PreloaderState();
 }
 
-class _WrapperState extends State<Wrapper> {
+class _PreloaderState extends State<Preloader> {
   @override
   void initState() {
     super.initState();
@@ -16,6 +16,6 @@ class _WrapperState extends State<Wrapper> {
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    return Container();
+    return Image.asset("assets/images/background.png");
   }
 }

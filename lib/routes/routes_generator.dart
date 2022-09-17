@@ -4,12 +4,12 @@ import 'package:turtle_messenger/views/screens/authentication/confirm_screen.dar
 import 'package:turtle_messenger/views/screens/authentication/login_screen.dart';
 import 'package:turtle_messenger/views/screens/authentication/register_screen.dart';
 import 'package:turtle_messenger/views/screens/home.dart';
-import 'package:turtle_messenger/wrapper.dart';
+import 'package:turtle_messenger/views/screens/preloader.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case RoutePath.wrapper:
-      return MaterialPageRoute(builder: (_) => const Wrapper());
+      return MaterialPageRoute(builder: (_) => const Preloader());
 
     case RoutePath.login:
       return MaterialPageRoute(builder: (_) => const LoginScreen());
@@ -31,6 +31,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (_) => const HomeScreen());
 
     default:
-      return MaterialPageRoute(builder: (_) => const Wrapper());
+      return MaterialPageRoute(builder: (_) => const Preloader());
   }
 }
