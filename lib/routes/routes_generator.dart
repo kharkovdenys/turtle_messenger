@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:turtle_messenger/main.dart';
 import 'package:turtle_messenger/routes/routes_path.dart';
 import 'package:turtle_messenger/views/screens/authentication/confirm_screen.dart';
 import 'package:turtle_messenger/views/screens/authentication/login_screen.dart';
@@ -31,6 +32,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (_) => const HomeScreen());
 
     default:
-      return MaterialPageRoute(builder: (_) => const Preloader());
+      return MaterialPageRoute(builder: (_) => const MyApp());
   }
 }

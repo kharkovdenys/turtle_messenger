@@ -1,8 +1,6 @@
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:turtle_messenger/models/Users.dart';
 import 'package:turtle_messenger/routes/routes_path.dart';
 import 'package:turtle_messenger/services/get_it_service.dart';
@@ -10,7 +8,8 @@ import 'package:turtle_messenger/services/navigation_service.dart';
 import 'package:turtle_messenger/stores/auth.dart';
 import 'package:turtle_messenger/stores/user.dart';
 import 'package:turtle_messenger/theme/colors.dart';
-import 'package:turtle_messenger/views/screens/settings/components/image_picker.dart';
+import 'package:turtle_messenger/views/screens/settings/components/button.dart';
+import 'package:turtle_messenger/views/screens/settings/components/user_section.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -21,125 +20,15 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final NavigationService _navigationService =
       getItInstanceConst<NavigationService>();
-
-  final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
-
-  bool addButtonloading = false;
   String profileImage =
       "https://www.arrowbenefitsgroup.com/wp-content/uploads/2018/04/unisex-avatar.png";
-  Users? currUser;
+  late Users currUser;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      body: SmartRefresher(
-        enablePullDown: false,
-        enablePullUp: true,
-        header: const MaterialClassicHeader(color: Colors.white),
-        controller: _refreshController,
-        onRefresh: _onRefresh,
-        child: getBody(),
-      ),
-    );
-  }
-
-  GestureDetector buildListItem(
-      {required String title,
-      required IconData icon,
-      required void Function() onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.red,
-                ),
-                child: Center(
-                  child: Icon(
-                    icon,
-                    color: white,
-                    size: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 12,
-              ),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: white,
-                  fontWeight: FontWeight.w500,
-                ),
-              )
-            ],
-          ),
-          Icon(
-            Icons.arrow_forward_ios,
-            color: white.withOpacity(0.2),
-            size: 15,
-          )
-        ],
-      ),
-    );
-  }
-
-  Container buildUserSection(Users? currUser) {
-    return Container(
-      width: double.infinity,
-      height: 90,
-      decoration: const BoxDecoration(color: textfieldColor),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: currUser == null
-                        ? null
-                        : DecorationImage(
-                            image: CachedNetworkImageProvider(profileImage),
-                            fit: BoxFit.cover,
-                          ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  currUser == null ? "" : currUser.username!,
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold, color: white),
-                ),
-              ],
-            ),
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                  color: white.withOpacity(0.1), shape: BoxShape.circle),
-              child: ImagePickerButton(
-                  username: currUser!.username!, image: setStateProfileImage),
-            )
-          ],
-        ),
-      ),
+      body: getBody(),
     );
   }
 
@@ -157,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
         const SizedBox(
           height: 10,
         ),
-        buildUserSection(currUser),
+        buildUserSection(currUser, profileImage, setStateProfileImage),
         const SizedBox(
           height: 30,
         ),
@@ -169,8 +58,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 const EdgeInsets.only(top: 8, bottom: 8, left: 10, right: 10),
             child: Column(
               children: [
-                buildListItem(
+                buildButton(
                   title: "Logout",
+                  color: Colors.red,
                   icon: Icons.logout,
                   onTap: () async {
                     await AuthStore().logout();
@@ -189,13 +79,13 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     setState(() {
-      currUser = UserStore().currUser;
+      currUser = UserStore().currUser!;
     });
     setStateProfileImage();
   }
 
   void setStateProfileImage() {
-    (Amplify.Storage.getUrl(key: currUser!.username!).then(
+    (Amplify.Storage.getUrl(key: currUser.username!).then(
         (value) => http.get(Uri.parse(value.url)).then((url) => setState(() {
               if (url.statusCode != 404) {
                 setState(() {
@@ -203,11 +93,5 @@ class _SettingsPageState extends State<SettingsPage> {
                 });
               }
             }))));
-  }
-
-  Future _onRefresh() async {
-    await UserStore().fetchCurrentUser();
-    await UserStore().fetchAllOtherUsers();
-    _refreshController.refreshCompleted();
   }
 }
