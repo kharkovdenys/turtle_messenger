@@ -5,62 +5,37 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:turtle_messenger/models/ModelProvider.dart';
 import 'package:turtle_messenger/stores/chat.dart';
 import 'package:turtle_messenger/stores/user.dart';
 import 'package:turtle_messenger/theme/colors.dart' as color;
-import 'package:turtle_messenger/views/screens/chat/ChatDetails/appbar.dart';
+import 'package:turtle_messenger/views/screens/chat/chatDetails/appbar.dart';
+import 'package:turtle_messenger/views/screens/chat/chatdetails/add_user.dart';
+import 'package:turtle_messenger/views/screens/chat/chatdetails/photo_view.dart';
 import 'package:turtle_messenger/views/widgets/snackbars.dart';
 import 'package:turtle_messenger/views/widgets/update_message_bottom_sheet.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final String name;
-  final String img;
+  final String? img;
   final String chatId;
-
+  final String? adminId;
+  final List<Users>? users;
+  final Function(Chatdata) updateLastMessage;
   const ChatDetailPage({
     Key? key,
     required this.name,
-    required this.img,
+    this.img,
     required this.chatId,
+    this.adminId,
+    this.users,
+    required this.updateLastMessage,
   }) : super(key: key);
 
   @override
   State<ChatDetailPage> createState() => _ChatDetailPageState();
-}
-
-class HeroPhotoViewRouteWrapper extends StatelessWidget {
-  final ImageProvider imageProvider;
-
-  final BoxDecoration? backgroundDecoration;
-  final dynamic minScale;
-  final dynamic maxScale;
-  const HeroPhotoViewRouteWrapper({
-    Key? key,
-    required this.imageProvider,
-    this.backgroundDecoration,
-    this.minScale,
-    this.maxScale,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints.expand(
-        height: MediaQuery.of(context).size.height,
-      ),
-      child: PhotoView(
-        imageProvider: imageProvider,
-        backgroundDecoration: backgroundDecoration,
-        minScale: minScale,
-        maxScale: maxScale,
-        heroAttributes: const PhotoViewHeroAttributes(tag: "someTag"),
-      ),
-    );
-  }
 }
 
 class _ChatDetailPageState extends State<ChatDetailPage> {
@@ -86,19 +61,33 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     }
   }
 
+  addUsers() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddUser(
+          chatId: widget.chatId,
+          users: widget.users!,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: color.bgColor,
       appBar: getChatDetailsAppBar(
         context: context,
-        img: widget.img,
+        img: widget.img ??
+            "https://www.arrowbenefitsgroup.com/wp-content/uploads/2018/04/unisex-avatar.png",
         name: widget.name,
         inSelectMode: inSelectMode,
         selectedChatCount: selectedChats.length,
         closeSelectionModel: closeSelectionModel,
         deleteSelectedChats: deleteSelectedChats,
         openUpdateMessageSheet: openUpdateMessageSheet,
+        addUsers: userStore.currUser!.id == widget.adminId ? addUsers : null,
       ),
       body: getBody(),
     );
@@ -125,7 +114,11 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                       url: urlImage(chatData[index].media![number]),
                       fileName: '',
                       type: MediaType.image)),
-              user: ChatUser(id: chatData[index].senderId!),
+              user: ChatUser(
+                  id: chatData[index].senderId!,
+                  firstName: widget.adminId == null
+                      ? null
+                      : getName(chatData[index].senderId!)),
               text: chatData[index].message!,
               customProperties: {"id": chatData[index].id},
               createdAt: DateTime.fromMillisecondsSinceEpoch(
@@ -226,6 +219,16 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     );
   }
 
+  String getName(String id) {
+    try {
+      String name =
+          (widget.users!.firstWhere((element) => element.id == id)).username!;
+      return name;
+    } catch (e) {
+      return "";
+    }
+  }
+
   handleSubscription(SubscriptionEvent<Chatdata> event) async {
     if (event.eventType == EventType.delete) {
       fetchChatData();
@@ -242,6 +245,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         }
       }
     }
+    widget.updateLastMessage(await chatStore.lastMessage(widget.chatId));
   }
 
   @override

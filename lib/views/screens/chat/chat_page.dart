@@ -10,7 +10,6 @@ import 'package:turtle_messenger/stores/user.dart';
 import 'package:turtle_messenger/theme/colors.dart';
 import 'package:turtle_messenger/views/screens/chat/chat_detail_page.dart';
 import 'package:turtle_messenger/views/screens/chat/chatdetails/add_chat.dart';
-import 'package:turtle_messenger/views/screens/chat/group_detail_page.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({Key? key}) : super(key: key);
@@ -159,6 +158,7 @@ class _UserChatCardState extends State<UserChatCard> {
                 name: nameChat,
                 img: profileImage,
                 chatId: widget.chatId,
+                updateLastMessage: setLastMessage,
               ),
             ),
           );
@@ -166,11 +166,12 @@ class _UserChatCardState extends State<UserChatCard> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => GroupDetailPage(
+              builder: (_) => ChatDetailPage(
                 users: users,
                 name: nameChat,
                 adminId: widget.adminId!,
                 chatId: widget.chatId,
+                updateLastMessage: setLastMessage,
               ),
             ),
           );
@@ -279,6 +280,12 @@ class _UserChatCardState extends State<UserChatCard> {
     }
   }
 
+  setLastMessage(Chatdata message) {
+    setState(() {
+      lastMessage = message;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -290,10 +297,8 @@ class _UserChatCardState extends State<UserChatCard> {
       });
       getUsers();
     }
-    ChatStore().lastMessage(widget.chatId).then((result) {
-      setState(() {
-        lastMessage = result;
-      });
-    });
+    ChatStore()
+        .lastMessage(widget.chatId)
+        .then((result) => setLastMessage(result));
   }
 }

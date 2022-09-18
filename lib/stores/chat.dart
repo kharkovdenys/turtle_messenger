@@ -80,7 +80,8 @@ class ChatStore extends ChangeNotifier {
   }
 
   Future sendPhoto(File image, String key) async {
-    _chartRepository.sendPhoto(image, key);
+    await _chartRepository.sendPhoto(image, key);
+    notifyListeners();
   }
 
   Future updateChat(String messageId, String updatedMessage) async {

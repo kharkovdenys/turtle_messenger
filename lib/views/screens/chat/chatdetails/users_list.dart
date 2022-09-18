@@ -10,8 +10,11 @@ import 'package:turtle_messenger/views/widgets/snackbars.dart';
 
 class UsersList extends StatefulWidget {
   final Users user;
+  final List<Users>? users;
+  final String? chatId;
 
-  const UsersList({Key? key, required this.user}) : super(key: key);
+  const UsersList({Key? key, required this.user, this.users, this.chatId})
+      : super(key: key);
 
   @override
   State<UsersList> createState() => _UsersListState();
@@ -71,38 +74,58 @@ class _UsersListState extends State<UsersList> {
                             ),
                             color: primary,
                             onPressed: () async {
-                              bool using = false;
-                              List<UserChat> user =
-                                  await Amplify.DataStore.query(
-                                      UserChat.classType,
-                                      where: UserChat.USERS.eq(widget.user.id));
-                              String myid = UserStore().currUser!.id;
-                              for (int i = 0; i < user.length; i++) {
-                                List<UserChat> temp =
+                              if (widget.chatId == null) {
+                                bool using = false;
+                                List<UserChat> chats =
                                     await Amplify.DataStore.query(
                                         UserChat.classType,
-                                        where: UserChat.CHAT
-                                            .eq(user[i].chat.id)
-                                            .and(UserChat.USERS.eq(myid)));
-                                if (temp.isNotEmpty) {
-                                  using = true;
+                                        where:
+                                            UserChat.USERS.eq(widget.user.id));
+                                String myid = UserStore().currUser!.id;
+                                for (int i = 0; i < chats.length; i++) {
+                                  List<UserChat> temp =
+                                      await Amplify.DataStore.query(
+                                          UserChat.classType,
+                                          where: UserChat.CHAT
+                                              .eq(chats[i].chat.id)
+                                              .and(UserChat.USERS.eq(myid)));
+                                  if (temp.isNotEmpty) {
+                                    using = true;
+                                  }
                                 }
-                              }
-                              if (!using) {
+                                if (!using) {
+                                  setState(() {
+                                    addButtonLoading = true;
+                                  });
+                                  await ChatStore()
+                                      .addUserToChatList(widget.user);
+                                  await UserStore().fetchCurrentUser();
+                                  await ChatStore().fetchUserChats();
+                                  setState(() {
+                                    addButtonLoading = false;
+                                  });
+                                } else {
+                                  WidgetsBinding.instance.addPostFrameCallback(
+                                      (_) => showErrorSnackBar(context,
+                                          "This user has already been added"));
+                                }
+                              } else if (!widget.users!.contains(widget.user)) {
                                 setState(() {
                                   addButtonLoading = true;
                                 });
-                                await ChatStore()
-                                    .addUserToChatList(widget.user);
+                                Chat chat = (await Amplify.DataStore.query(
+                                    Chat.classType,
+                                    where: Chat.ID.eq(widget.chatId)))[0];
+                                await Amplify.DataStore.save(
+                                    UserChat(users: widget.user, chat: chat));
                                 await UserStore().fetchCurrentUser();
                                 await ChatStore().fetchUserChats();
                                 setState(() {
                                   addButtonLoading = false;
                                 });
                               } else {
-                                WidgetsBinding.instance.addPostFrameCallback(
-                                    (_) => showErrorSnackBar(context,
-                                        "This user has already been added"));
+                                showErrorSnackBar(context,
+                                    "This user has already been added");
                               }
                             },
                           ),
