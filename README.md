@@ -1,16 +1,47 @@
-# turtle_messenger
+<div align="center">
+<h1>Turtle Messenger</h1>
 
-A new Messenger.
+<p>
 
-## Getting Started
+<img src="https://img.shields.io/github/license/kharkovdenys/turtle_messenger?color=blue" >
 
-This project is a starting point for a Flutter application.
+<img src="https://img.shields.io/badge/made%20by-kharkovdenys-blue.svg" >
 
-A few resources to get you started if this is your first Flutter project:
+<img src="https://img.shields.io/badge/platform-android-blue.svg" >
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+<img src="https://img.shields.io/github/languages/top/kharkovdenys/turtle_messenger.svg">
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img src="https://img.shields.io/github/stars/kharkovdenys/turtle_messenger.svg?style=flat">
+
+</p>
+</div>
+
+A new Messenger
+
+---
+
+<div align="center">
+<img src="./assets/images/demo.gif" alt="Turtle Messenger" />
+</div>
+
+## Add-on capabilities:
+
+* Possibility of registration by mail with a one-time password, authentication, exit from the account
+* After authentication, the user automatically synchronizes all chats: private and group
+* The ability to create chats, for private opportunities to add other users only for the person who created this group
+* Messages can be of two types: text and graphic
+* The user can send messages, as well as delete and edit their messages
+* Possibility to change the avatar in the profile
+* Shows the last chat message sent and the date it was sent
+
+## Dependencies
+
+* [Dart](https://dart.dev/)
+* [Flutter](https://flutter.dev/)
+* [Amplify](https://aws.amazon.com/amplify/)
+* [GetIt](https://pub.dev/packages/get_it)
+* [Provider](https://pub.dev/packages/provider)
+* [Cached Network Image](https://pub.dev/packages/cached_network_image)
+* [Image Picker](https://pub.dev/packages/image_picker)
+* [Dash Chat](https://pub.dev/packages/dash_chat_2)
+* [Photo View](https://pub.dev/packages/photo_view)
